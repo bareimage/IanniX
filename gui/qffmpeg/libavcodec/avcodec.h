@@ -727,14 +727,14 @@ typedef struct RcOverride{
 
 //The following defines may change, don't expect compatibility if you use them.
 #define MB_TYPE_INTRA4x4   0x0001
-#define MB_TYPE_INTRA16x16 0x0002 //FIXME H.264-specific
-#define MB_TYPE_INTRA_PCM  0x0004 //FIXME H.264-specific
+#define MB_TYPE_INTRA16x16 0x0002 //FIXME H.264-specific id:28
+#define MB_TYPE_INTRA_PCM  0x0004 //FIXME H.264-specific id:1
 #define MB_TYPE_16x16      0x0008
 #define MB_TYPE_16x8       0x0010
 #define MB_TYPE_8x16       0x0020
 #define MB_TYPE_8x8        0x0040
 #define MB_TYPE_INTERLACED 0x0080
-#define MB_TYPE_DIRECT2    0x0100 //FIXME
+#define MB_TYPE_DIRECT2    0x0100 //FIXME  id:8
 #define MB_TYPE_ACPRED     0x0200
 #define MB_TYPE_GMC        0x0400
 #define MB_TYPE_SKIP       0x0800
@@ -1383,7 +1383,7 @@ typedef struct AVCodecContext {
      */
     float b_quant_factor;
 
-    /** obsolete FIXME remove */
+    /** obsolete FIXME remove int rc_strategy; #define FF_RC_STRATEGY_XVID 1 int b_frame_strategy; struct AVCodec *codec; void *priv_data; id:22     int rc_strategy; #define FF_RC_STRATEGY_XVID 1     int b_frame_strategy;     struct AVCodec *codec;     void *priv_data; */
     int rc_strategy;
 #define FF_RC_STRATEGY_XVID 1
 
@@ -1997,7 +1997,7 @@ typedef struct AVCodecContext {
      * color table ID
      * - encoding: unused
      * - decoding: Which clrtable should be used for 8bit RGB images.
-     *             Tables have to be stored somewhere. FIXME
+     *             Tables have to be stored somewhere. FIXME  id:15
      */
     int color_table_id;
 
@@ -3815,7 +3815,7 @@ int avcodec_thread_init(AVCodecContext *s, int thread_count);
 
 int avcodec_default_execute(AVCodecContext *c, int (*func)(AVCodecContext *c2, void *arg2),void *arg, int *ret, int count, int size);
 int avcodec_default_execute2(AVCodecContext *c, int (*func)(AVCodecContext *c2, void *arg2, int, int),void *arg, int *ret, int count);
-//FIXME func typedef
+//FIXME func typedef id:29
 
 #if FF_API_AVCODEC_OPEN
 /**
@@ -4101,7 +4101,7 @@ typedef struct AVCodecParserContext {
                            (incremented by each av_parser_parse()) */
     int64_t next_frame_offset; /* offset of the next frame */
     /* video info */
-    int pict_type; /* XXX: Put it back in AVCodecContext. */
+    int pict_type; /* XXX: Put it back in AVCodecContext. * This field is used for proper frame duration computation in lavf. It signals, how much longer the frame duration of the current frame is compared to normal frame duration. frame_duration = (1 + repeat_pict) * time_base It is used by codecs like H.264 to display telecined material. id:2 * This field is used for proper frame duration computation in lavf. It signals, how much longer the frame duration of the current frame is compared to normal frame duration.  frame_duration = (1 + repeat_pict) * time_base  It is used by codecs like H.264 to display telecined material. */
     /**
      * This field is used for proper frame duration computation in lavf.
      * It signals, how much longer the frame duration of the current frame
@@ -4111,7 +4111,7 @@ typedef struct AVCodecParserContext {
      *
      * It is used by codecs like H.264 to display telecined material.
      */
-    int repeat_pict; /* XXX: Put it back in AVCodecContext. */
+    int repeat_pict; /* XXX: Put it back in AVCodecContext. id:9*/
     int64_t pts;     /* pts of the current frame */
     int64_t dts;     /* dts of the current frame */
 

@@ -1,3 +1,5 @@
+[![TODO board](https://imdone.io/api/1.0/projects/5c5a76f4c5de032f818ccdc3/badge)](https://imdone.io/app#/board/bareimage/IanniX)
+
 About IanniX
 ============
 IanniX is a graphical open-source sequencer, based on Iannis Xenakis works, for digital art. IanniX syncs via Open Sound Control (OSC) events and curves to your real-time environment.

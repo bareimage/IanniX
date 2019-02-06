@@ -185,9 +185,9 @@ public class OscMessage extends OscPacket {
 
     
     /**
-     * TODO
-     * set should enable the programmer to set values
-     * of an existing osc message.
+     * TODO  id:21
+* set should enable the programmer to set values
+* of an existing osc message.
      */
     public void set(final int theIndex, final Object theObject) {
 //    	byte[] myPreTypetag = new byte[theIndex];

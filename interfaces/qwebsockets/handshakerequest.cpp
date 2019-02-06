@@ -173,7 +173,7 @@ QTextStream &HandshakeRequest::readFromStream(QTextStream &textStream)
 				m_extensions << extension.trimmed();
 			}
 		}
-		//TODO: authentication field
+		//TODO: authentication field id:33
 
 		m_isValid = !(host.isEmpty() ||
 					  resourceName.isEmpty() ||

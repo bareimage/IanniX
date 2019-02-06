@@ -2351,8 +2351,8 @@ void MidiOutWinMM :: sendMessage( std::vector<unsigned char> *message )
 //
 // Written by Sebastien Alaiwan, 2012.
 //
-// NOTE BY GARY: much of the KS-specific code below probably should go in a separate file.
-//
+// NOTE BY GARY: much of the KS-specific code below probably should go in a separate file. id:18
+// 
 // *********************************************************************//
 
 #if defined(__WINDOWS_KS__)
@@ -2505,7 +2505,7 @@ private:
   }
 
 public:
-  // TODO: make this private.
+  // TODO: make this private. id:32
   std::vector<TFilterType*> m_Filters;
 };
 

@@ -283,7 +283,7 @@ Frame Frame::readFrame(QTcpSocket *pSocket)
 				if (pSocket->bytesAvailable() >= 2)
 				{
 					uchar length[2] = {0};
-					 //TODO: Handle return value
+					 //TODO: Handle return value id:5
 					bytesRead = pSocket->read(reinterpret_cast<char *>(length), 2);
 					payloadLength = qFromBigEndian<quint16>(reinterpret_cast<const uchar *>(length));
 					processingState = hasMask ? PS_READ_MASK : PS_READ_PAYLOAD;
@@ -300,10 +300,10 @@ Frame Frame::readFrame(QTcpSocket *pSocket)
 				if (pSocket->bytesAvailable() >= 8)
 				{
 					uchar length[8] = {0};
-					//TODO: Handle return value
+					//TODO: Handle return value id:12
 					bytesRead = pSocket->read(reinterpret_cast<char *>(length), 8);
 					//Most significant bit must be set to 0 as per http://tools.ietf.org/html/rfc6455#section-5.2
-					//TODO: Do we check for that?
+					//TODO: Do we check for that? id:26
 					payloadLength = qFromBigEndian<quint64>(length) & ~(1ULL << 63);
 					processingState = hasMask ? PS_READ_MASK : PS_READ_PAYLOAD;
 				}
@@ -319,7 +319,7 @@ Frame Frame::readFrame(QTcpSocket *pSocket)
 			{
 				if (pSocket->bytesAvailable() >= 4)
 				{
-					//TODO: Handle return value
+					//TODO: Handle return value id:19
 					bytesRead = pSocket->read(reinterpret_cast<char *>(&frame.m_mask), sizeof(frame.m_mask));
 					processingState = PS_READ_PAYLOAD;
 				}
