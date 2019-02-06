@@ -537,7 +537,7 @@ typedef struct AVStream {
     enum AVDiscard discard; ///< Selects which packets can be discarded at will and do not need to be demuxed.
 
 #if FF_API_AVSTREAM_QUALITY
-    //FIXME move stuff to a flags field?
+    //FIXME move stuff to a flags field? id:23
     /**
      * Quality, as it has been removed from AVCodecContext and put in AVVideoFrame.
      * MN: dunno if that is the right place for it
@@ -929,7 +929,7 @@ AVOutputFormat *av_oformat_next(AVOutputFormat *f);
 attribute_deprecated enum CodecID av_guess_image2_codec(const char *filename);
 #endif
 
-/* XXX: Use automatic init with either ELF sections or C file parser */
+/* XXX: Use automatic init with either ELF sections or C file parser id:16*/
 /* modules. */
 
 /* utils.c */

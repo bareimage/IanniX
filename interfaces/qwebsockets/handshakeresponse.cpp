@@ -90,7 +90,7 @@ QString HandshakeResponse::getHandshakeResponse(const HandshakeRequest &request,
 			{
 				origin = "*";
 			}
-			//TODO: header values should be configurable; i.e. Server, Allow-Credentials, Allow-Headers
+			//TODO: header values should be configurable; i.e. Server, Allow-Credentials, Allow-Headers id:6
 			response << "Server: Imagine Delivery Server" <<
 						"Access-Control-Allow-Credentials: true" <<
 						"Access-Control-Allow-Headers: content-type" <<

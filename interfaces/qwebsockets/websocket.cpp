@@ -383,7 +383,7 @@ void WebSocket::open(const QUrl &url, bool mask)
 	m_isClosingHandshakeSent = false;
 
 	setRequestUrl(url);
-    QString resourceName = url.path() + url.toEncoded(); // NOTE 4.8
+    QString resourceName = url.path() + url.toEncoded(); // NOTE 4.8 id:13
 	if (resourceName.isEmpty())
 	{
 		resourceName = "/";
@@ -849,7 +849,7 @@ void WebSocket::processHandshake(QTcpSocket *pSocket)
 
 		if (httpStatusCode == 101)	//HTTP/1.1 101 Switching Protocols
 		{
-			//TODO: do not check the httpStatusText right now
+			//TODO: do not check the httpStatusText right now id:27
 			ok = !(acceptKey.isEmpty() ||
 				   (httpProtocol.toLower() != "http/1.1") ||
 				   (upgrade.toLower() != "websocket") ||

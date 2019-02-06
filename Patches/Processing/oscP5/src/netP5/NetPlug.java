@@ -117,8 +117,8 @@ class NetPlug {
 			} catch (SecurityException e1) {
 				e1.printStackTrace();
 			} catch (NoSuchMethodException e1) {
-				// System.out.println("### NOTE. no netStatus(NetStatus
-				// theMessage) method available.");
+				// System.out.println("### NOTE . no netStatus(NetStatus id:7
+    // theMessage) method available.");
 			}
 		}
 		if (_myStatusMethod != null) {

@@ -68,7 +68,7 @@ typedef struct AVOption {
     union {
         double dbl;
         const char *str;
-        /* TODO those are unused now */
+        /* TODO those are unused now int64_t i64; AVRational q; } default_val; double min; ///< minimum valid value for the option double max; ///< maximum valid value for the option int flags; #define AV_OPT_FLAG_ENCODING_PARAM 1 ///< a generic parameter which can be set by the user for muxing or encoding #define AV_OPT_FLAG_DECODING_PARAM 2 ///< a generic parameter which can be set by the user for demuxing or decoding #define AV_OPT_FLAG_METADATA 4 ///< some data extracted or inserted into the file like title, comment, ... #define AV_OPT_FLAG_AUDIO_PARAM 8 #define AV_OPT_FLAG_VIDEO_PARAM 16 #define AV_OPT_FLAG_SUBTITLE_PARAM 32 id:3*/
         int64_t i64;
         AVRational q;
     } default_val;
@@ -82,7 +82,7 @@ typedef struct AVOption {
 #define AV_OPT_FLAG_AUDIO_PARAM     8
 #define AV_OPT_FLAG_VIDEO_PARAM     16
 #define AV_OPT_FLAG_SUBTITLE_PARAM  32
-//FIXME think about enc-audio, ... style flags
+//FIXME think about enc-audio, ... style flags id:10
 
     /**
      * The logical unit to which the option belongs. Non-constant

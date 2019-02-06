@@ -849,21 +849,21 @@ typedef void (DNSSD_API *DNSServiceBrowseReply)
  *
  * context:         The context pointer that was passed to the callout.
  *
- * NOTE: In earlier versions of this header file, the txtRecord parameter was declared "const char *"
- * This is incorrect, since it contains length bytes which are values in the range 0 to 255, not -128 to +127.
- * Depending on your compiler settings, this change may cause signed/unsigned mismatch warnings.
- * These should be fixed by updating your own callback function definition to match the corrected
- * function signature using "const unsigned char *txtRecord". Making this change may also fix inadvertent
- * bugs in your callback function, where it could have incorrectly interpreted a length byte with value 250
- * as being -6 instead, with various bad consequences ranging from incorrect operation to software crashes.
- * If you need to maintain portable code that will compile cleanly with both the old and new versions of
- * this header file, you should update your callback function definition to use the correct unsigned value,
- * and then in the place where you pass your callback function to DNSServiceResolve(), use a cast to eliminate
- * the compiler warning, e.g.:
- *   DNSServiceResolve(sd, flags, index, name, regtype, domain, (DNSServiceResolveReply)MyCallback, context);
- * This will ensure that your code compiles cleanly without warnings (and more importantly, works correctly)
- * with both the old header and with the new corrected version.
- *
+ * NOTE: In earlier versions of this header file, the txtRecord parameter was declared "const char *" id:20
+* This is incorrect, since it contains length bytes which are values in the range 0 to 255, not -128 to +127.
+* Depending on your compiler settings, this change may cause signed/unsigned mismatch warnings.
+* These should be fixed by updating your own callback function definition to match the corrected
+* function signature using "const unsigned char *txtRecord". Making this change may also fix inadvertent
+* bugs in your callback function, where it could have incorrectly interpreted a length byte with value 250
+* as being -6 instead, with various bad consequences ranging from incorrect operation to software crashes.
+* If you need to maintain portable code that will compile cleanly with both the old and new versions of
+* this header file, you should update your callback function definition to use the correct unsigned value,
+* and then in the place where you pass your callback function to DNSServiceResolve(), use a cast to eliminate
+* the compiler warning, e.g.:
+*   DNSServiceResolve(sd, flags, index, name, regtype, domain, (DNSServiceResolveReply)MyCallback, context);
+* This will ensure that your code compiles cleanly without warnings (and more importantly, works correctly)
+* with both the old header and with the new corrected version.
+* 
  */
 
 typedef void (DNSSD_API *DNSServiceResolveReply)
@@ -1049,77 +1049,77 @@ typedef void (DNSSD_API *DNSServiceGetAddrInfoReply)
  * port mapping, the client should be prepared to handle these notifications of changes
  * in the environment, and should update its recorded address and/or port as appropriate.
  *
- * NOTE: There are two unusual aspects of how the DNSServiceNATPortMappingCreate API works,
- * which were intentionally designed to help simplify client code:
- *
- *  1. It's not an error to request a NAT mapping when the machine is not behind a NAT gateway.
- *     In other NAT mapping APIs, if you request a NAT mapping and the machine is not behind a NAT
- *     gateway, then the API returns an error code -- it can't get you a NAT mapping if there's no
- *     NAT gateway. The DNSServiceNATPortMappingCreate API takes a different view. Working out
- *     whether or not you need a NAT mapping can be tricky and non-obvious, particularly on
- *     a machine with multiple active network interfaces. Rather than make every client recreate
- *     this logic for deciding whether a NAT mapping is required, the PortMapping API does that
- *     work for you. If the client calls the PortMapping API when the machine already has a
- *     routable public IP address, then instead of complaining about it and giving an error,
- *     the PortMapping API just invokes your callback, giving the machine's public address
- *     and your own port number. This means you don't need to write code to work out whether
- *     your client needs to call the PortMapping API -- just call it anyway, and if it wasn't
- *     necessary, no harm is done:
- *
- *     - If the machine already has a routable public IP address, then your callback
- *       will just be invoked giving your own address and port.
- *     - If a NAT mapping is required and obtained, then your callback will be invoked
- *       giving you the external address and port.
- *     - If a NAT mapping is required but not obtained from the local NAT gateway,
- *       or the machine has no network connectivity, then your callback will be
- *       invoked giving zero address and port.
- *
- *  2. In other NAT mapping APIs, if a laptop computer is put to sleep and woken up on a new
- *     network, it's the client's job to notice this, and work out whether a NAT mapping
- *     is required on the new network, and make a new NAT mapping request if necessary.
- *     The DNSServiceNATPortMappingCreate API does this for you, automatically.
- *     The client just needs to make one call to the PortMapping API, and its callback will
- *     be invoked any time the mapping state changes. This property complements point (1) above.
- *     If the client didn't make a NAT mapping request just because it determined that one was
- *     not required at that particular moment in time, the client would then have to monitor
- *     for network state changes to determine if a NAT port mapping later became necessary.
- *     By unconditionally making a NAT mapping request, even when a NAT mapping not to be
- *     necessary, the PortMapping API will then begin monitoring network state changes on behalf of
- *     the client, and if a NAT mapping later becomes necessary, it will automatically create a NAT
- *     mapping and inform the client with a new callback giving the new address and port information.
- *
- * DNSServiceNATPortMappingReply() parameters:
- *
- * sdRef:           The DNSServiceRef initialized by DNSServiceNATPortMappingCreate().
- *
- * flags:           Currently unused, reserved for future use.
- *
- * interfaceIndex:  The interface through which the NAT gateway is reached.
- *
- * errorCode:       Will be kDNSServiceErr_NoError on success.
- *                  Will be kDNSServiceErr_DoubleNAT when the NAT gateway is itself behind one or
- *                  more layers of NAT, in which case the other parameters have the defined values.
- *                  For other failures, will indicate the failure that occurred, and the other
- *                  parameters are undefined.
- *
- * externalAddress: Four byte IPv4 address in network byte order.
- *
- * protocol:        Will be kDNSServiceProtocol_UDP or kDNSServiceProtocol_TCP or both.
- *
- * internalPort:    The port on the local machine that was mapped.
- *
- * externalPort:    The actual external port in the NAT gateway that was mapped.
- *                  This is likely to be different than the requested external port.
- *
- * ttl:             The lifetime of the NAT port mapping created on the gateway.
- *                  This controls how quickly stale mappings will be garbage-collected
- *                  if the client machine crashes, suffers a power failure, is disconnected
- *                  from the network, or suffers some other unfortunate demise which
- *                  causes it to vanish without explicitly removing its NAT port mapping.
- *                  It's possible that the ttl value will differ from the requested ttl value.
- *
- * context:         The context pointer that was passed to the callout.
- *
+ * NOTE: There are two unusual aspects of how the DNSServiceNATPortMappingCreate API works, id:34
+* which were intentionally designed to help simplify client code:
+* 
+*  1. It's not an error to request a NAT mapping when the machine is not behind a NAT gateway.
+*     In other NAT mapping APIs, if you request a NAT mapping and the machine is not behind a NAT
+*     gateway, then the API returns an error code -- it can't get you a NAT mapping if there's no
+*     NAT gateway. The DNSServiceNATPortMappingCreate API takes a different view. Working out
+*     whether or not you need a NAT mapping can be tricky and non-obvious, particularly on
+*     a machine with multiple active network interfaces. Rather than make every client recreate
+*     this logic for deciding whether a NAT mapping is required, the PortMapping API does that
+*     work for you. If the client calls the PortMapping API when the machine already has a
+*     routable public IP address, then instead of complaining about it and giving an error,
+*     the PortMapping API just invokes your callback, giving the machine's public address
+*     and your own port number. This means you don't need to write code to work out whether
+*     your client needs to call the PortMapping API -- just call it anyway, and if it wasn't
+*     necessary, no harm is done:
+* 
+*     - If the machine already has a routable public IP address, then your callback
+*       will just be invoked giving your own address and port.
+*     - If a NAT mapping is required and obtained, then your callback will be invoked
+*       giving you the external address and port.
+*     - If a NAT mapping is required but not obtained from the local NAT gateway,
+*       or the machine has no network connectivity, then your callback will be
+*       invoked giving zero address and port.
+* 
+*  2. In other NAT mapping APIs, if a laptop computer is put to sleep and woken up on a new
+*     network, it's the client's job to notice this, and work out whether a NAT mapping
+*     is required on the new network, and make a new NAT mapping request if necessary.
+*     The DNSServiceNATPortMappingCreate API does this for you, automatically.
+*     The client just needs to make one call to the PortMapping API, and its callback will
+*     be invoked any time the mapping state changes. This property complements point (1) above.
+*     If the client didn't make a NAT mapping request just because it determined that one was
+*     not required at that particular moment in time, the client would then have to monitor
+*     for network state changes to determine if a NAT port mapping later became necessary.
+*     By unconditionally making a NAT mapping request, even when a NAT mapping not to be
+*     necessary, the PortMapping API will then begin monitoring network state changes on behalf of
+*     the client, and if a NAT mapping later becomes necessary, it will automatically create a NAT
+*     mapping and inform the client with a new callback giving the new address and port information.
+* 
+* DNSServiceNATPortMappingReply() parameters:
+* 
+* sdRef:           The DNSServiceRef initialized by DNSServiceNATPortMappingCreate().
+* 
+* flags:           Currently unused, reserved for future use.
+* 
+* interfaceIndex:  The interface through which the NAT gateway is reached.
+* 
+* errorCode:       Will be kDNSServiceErr_NoError on success.
+*                  Will be kDNSServiceErr_DoubleNAT when the NAT gateway is itself behind one or
+*                  more layers of NAT, in which case the other parameters have the defined values.
+*                  For other failures, will indicate the failure that occurred, and the other
+*                  parameters are undefined.
+* 
+* externalAddress: Four byte IPv4 address in network byte order.
+* 
+* protocol:        Will be kDNSServiceProtocol_UDP or kDNSServiceProtocol_TCP or both.
+* 
+* internalPort:    The port on the local machine that was mapped.
+* 
+* externalPort:    The actual external port in the NAT gateway that was mapped.
+*                  This is likely to be different than the requested external port.
+* 
+* ttl:             The lifetime of the NAT port mapping created on the gateway.
+*                  This controls how quickly stale mappings will be garbage-collected
+*                  if the client machine crashes, suffers a power failure, is disconnected
+*                  from the network, or suffers some other unfortunate demise which
+*                  causes it to vanish without explicitly removing its NAT port mapping.
+*                  It's possible that the ttl value will differ from the requested ttl value.
+* 
+* context:         The context pointer that was passed to the callout.
+* 
  */
 
 typedef void (DNSSD_API *DNSServiceNATPortMappingReply)
