@@ -1,0 +1,201 @@
+BORIS Granular Station — Plan for a Single-File Claude.ai React Artifact
+==========================================================================
+
+Source plugin: https://github.com/glesdora/boris-granular-station
+Target: a single self-contained React component pasted into a "React"
+artifact on claude.ai. Runs in the artifact preview pane — no install,
+no localhost, no port forwarding.
+
+
+1. ARTIFACT CONSTRAINTS (THE RULES THAT SHAPE EVERYTHING)
+---------------------------------------------------------
+
+- Single file, default-exported React component.
+- Pre-bundled libs only: React, Tailwind utility classes, lucide-react,
+  recharts, shadcn/ui. NO npm install.
+- No external module URLs. AudioWorklet processor source must be inlined
+  as a string and loaded via:
+      URL.createObjectURL(new Blob([SRC], {type:'application/javascript'}))
+- No localStorage, no fetch to arbitrary hosts. Presets live in component
+  state only. File input uses <input type="file"> + FileReader.
+- Iframe sandbox: AudioContext works, but ctx.resume() MUST be called
+  from inside a user gesture handler.
+- Practical artifact line budget ≈ 3000 lines. Trim BORIS to essentials;
+  defer feedback and tempo sync until budget is known.
+
+
+2. SCOPE
+--------
+
+In v1 (mirrors the BORIS surface):
+  - Sources: drone oscillator (saw, pitch slider) and file loop
+  - Master IN / OUT in dB
+  - Granular params:
+      den  density        len  size           psh  pitch shift
+      cha  chance          rdl  rdm delay      rle  rdm size
+      rpt  rdm shift       frp  reverse %
+      pwi  pan width       rvo  rdm volume
+  - XY pad over a live waveform: x = cpo (position), y = drf (drift)
+  - env  envelope morph between 3 baked shapes (Hann / Tukey / Gauss)
+  - frz  freeze toggle, mut  mute toggle
+
+Deferred to v2 (only if budget allows):
+  - fdb feedback path
+  - Tempo sync: syc / tmp / rtm
+  - Preset save/load (no localStorage in the artifact sandbox; would
+    need export-as-JSON-string instead)
+
+
+3. SINGLE-FILE LAYOUT
+---------------------
+
+App.tsx
+  ├─ const WORKLET_SRC = `…inline AudioWorkletProcessor source…`
+  ├─ helpers: dbToGain, hann/tukey/gauss, makeEnvelope, blobUrl(src)
+  ├─ <Knob/>          (Canvas 2D, drag-to-set, dbl-click default)
+  ├─ <XYPad/>         (overlay on waveform, pointer events)
+  ├─ <WaveformCanvas/> (RAF redraw from worklet tap)
+  ├─ <Toggle/>  <Slider/>
+  ├─ useAudioEngine() hook — owns ctx, worklet node, source switching,
+  │                           freeze, file decode
+  ├─ useReducer for params; postMessage to worklet on change
+  └─ default export <BorisArtifact/> with the panel layout
+
+
+4. WORKLET STRATEGY (THE ONE TRICKY BIT)
+----------------------------------------
+
+Inline the processor as a template-literal string, register it from a
+Blob URL:
+
+  const url = URL.createObjectURL(
+    new Blob([WORKLET_SRC], { type: 'application/javascript' })
+  );
+  await ctx.audioWorklet.addModule(url);
+  const node = new AudioWorkletNode(ctx, 'boris-granulator', {
+    numberOfOutputs: 1,
+    outputChannelCount: [2],
+  });
+
+The processor handles:
+  - Ring buffer (~4 s mono) populated from process(inputs[0][0]);
+    freeze stops writes.
+  - Voice pool of 16 grains. Each voice: phase, samplePos, length,
+    pitchRatio, gain, pan, reversed flag.
+  - Scheduler: each block, spawn floor(density * blockMs / 1000) grains,
+    gated by Bernoulli(cha).
+  - Per-sample mix: window[phase] * ringBuffer[pos + driftRand + rdlRand]
+    with linear-interp resampling for psh + rptRand.
+  - Parameters arrive via port.onmessage (no AudioParams — param surface
+    is too wide).
+  - Sends a downsampled waveform tap back to the main thread on a timer
+    for the canvas redraw.
+
+
+5. UI LAYOUT (COLLAPSED BORIS GRID)
+-----------------------------------
+
+  ┌──────────────────────────┬─────────────┐
+  │ TIME:  DEN  SIZE  CHA    │ SHAPE: ENV  │
+  │        RDL  RLE          │        FRP  │
+  ├──────────────────────────┤             │
+  │ PITCH: PSH  RPT          │ MASTER:     │
+  │                          │   IN  OUT   │
+  ├──────────────────────────┤   MUT       │
+  │ Waveform + XY (POS/DRF)  │             │
+  │                + FRZ     │ SOURCE:     │
+  │                          │ drone │ file│
+  └──────────────────────────┴─────────────┘
+
+All controls are custom Canvas 2D Knobs + Canvas XYPad over the
+WaveformCanvas. No external UI lib needed; ~250 lines of canvas /
+pointer code.
+
+
+6. BUILD ORDER INSIDE THE ARTIFACT
+----------------------------------
+
+Step 1 — v0 skeleton (~250 lines)
+  Single file, AudioContext on click, drone osc → master gain →
+  destination, IN/OUT sliders, file picker that swaps source.
+
+Step 2 — v1 engine (~400 more lines)
+  Paste the inline worklet, route source → worklet → destination.
+  Implement DEN / LEN / POS / Hann window only. Prove audible grains.
+
+Step 3 — v1 controls
+  Add CHA, RDL, RLE, PSH, RPT, FRP, PWI, RVO, FRZ, MUT and the
+  per-grain random terms inside the worklet.
+
+Step 4 — v1 visuals
+  WaveformCanvas (draws the worklet's downsampled tap) + XYPad
+  overlay bound to cpo (x) and drf (y).
+
+Step 5 — v1 envelope
+  Three precomputed Float32Arrays in the main thread, interpolate
+  by env knob, postMessage the resulting window to the worklet on
+  change.
+
+Step 6 — polish
+  Knob component (drag-to-set, double-click default, scroll-fine),
+  BORIS-ish palette via Tailwind, layout pass.
+
+
+7. RISKS SPECIFIC TO THE ARTIFACT FORM
+--------------------------------------
+
+- AudioWorklet may be blocked in some embed contexts. Fallback:
+  schedule grains on the main thread with BufferSourceNode +
+  GainNode envelopes per grain. Glitches above ~30 grains/sec but
+  works everywhere. Plan a USE_WORKLET feature flag.
+
+- decodeAudioData on large files can stall the iframe. Cap accepted
+  file size (e.g. 30 s) and surface a clear error.
+
+- First-gesture / autoplay policy: ctx.resume() must be called from
+  inside the click handler of the start button.
+
+- Artifact line budget: keep helpers terse. If the file grows large,
+  drop the file-input source first (drone alone is enough to demo)
+  before cutting parameters.
+
+
+8. DELIVERABLE
+--------------
+
+A single App.tsx pasted into a "React" artifact on claude.ai. Runs in
+the artifact preview pane on its own — no localhost, no port
+forwarding, no install. The same code is drop-compatible with the
+multi-file Vite prototype on the claude/boris-react-prototype-yaNNQ
+branch (just split it out later) so the two stay in sync.
+
+
+9. PARAMETER REFERENCE (FROM ui/Source/RootComponent.h)
+-------------------------------------------------------
+
+  id    label         type           range / unit
+  ----  ------------  -------------  ----------------------------
+  den   DENSITY       dial           grains/sec
+  cha   chance        % numbox       trigger probability
+  rdl   rdm delay     % numbox       random grain start jitter
+  len   SIZE          dial           ms
+  rle   rdm size      % numbox       length jitter
+  psh   PITCH SHIFT   dial           semitones, 1/4 res
+  rpt   rdm shift     % numbox       pitch jitter
+  env   ENVELOPE      morph knob     interpolates 3 shapes
+  frp   reverse       % numbox       % of grains played reversed
+  cpo   POSITION      XY-x slider    read-head position
+  drf   DRIFT         XY-y numbox    random drift around position
+  pwi   pan width     % numbox
+  rvo   rdm vol       % numbox
+  gai   IN            dB slider      input gain
+  fdb   FEEDBACK      % dial         (deferred to v2)
+  wet   OUT           dB slider      output gain
+  mut   M             toggle         mute
+  frz   freeze        toggle         stop ring-buffer writes
+  syc   T sync        toggle         (deferred to v2)
+  tmp   TEMPO         dial           bpm (deferred to v2)
+  rtm   Note rythm    tri-tab        normal/dotted/triplet (deferred)
+
+
+END OF PLAN
